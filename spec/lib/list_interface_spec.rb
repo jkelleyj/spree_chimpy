@@ -114,46 +114,20 @@ describe Spree::Chimpy::Interface::List do
   end
 
   it "segments users" do
-    expect(member_api).to receive(:upsert)
-      .with(hash_including(
-        body: {
-          email_address: email,
-          status: "subscribed",
-          merge_fields: { 'SIZE' => '10' },
-          email_type: 'html'
-        })
-      )
-
-    expect(segments_api).to receive(:retrieve).with(
-      params: { "fields" => "segments.id,segments.name"}
-    ).and_return(segments_response)
-
-    expect(segment_api).to receive(:create).with(
-      body: { members_to_add: [email] }
-    )
+    Spree::Chimpy::Config.customer_segment_name = "customers"
+    expect(lists).to receive(:subscribe).
+      with('a3d3', {email: 'user@example.com'}, {'SIZE' => '10'},
+            'html', true, true, true, true)
+    expect(lists).to receive(:static_segments).with('a3d3').and_return([{"id" => 123, "name" => "customers"}])
+    expect(lists).to receive(:static_segment_members_add).with('a3d3', 123, [{:email => "user@example.com"}])
     interface.subscribe("user@example.com", {'SIZE' => '10'}, {customer: true})
   end
 
   it "segments" do
-    emails = ["test@test.nl", "test@test.com"]
-    expect(segments_api).to receive(:retrieve).with(
-      params: { "fields" => "segments.id,segments.name"}
-    ).and_return(segments_response)
-
-    expect(segment_api).to receive(:create).with(
-      body: { members_to_add: emails }
-    )
-    interface.segment(emails)
-  end
-
-  it "creates the segment" do
-    expect(segments_api).to receive(:create).with(
-      body: {
-        name: "customers",
-        static_segment: []
-      }
-    ).and_return({ "id" => 3959 })
-    expect(interface.create_segment).to eq 3959
+    Spree::Chimpy::Config.customer_segment_name = "customers"
+    expect(lists).to receive(:static_segments).with('a3d3').and_return([{"id" => '123', "name" => "customers"}])
+    expect(lists).to receive(:static_segment_members_add).with('a3d3', 123, [{email: "test@test.nl"}, {email: "test@test.com"}])
+    interface.segment(["test@test.nl", "test@test.com"])
   end
 
   it "find list id" do
@@ -171,5 +145,14 @@ describe Spree::Chimpy::Interface::List do
       tag: "SIZE", name: "Your Size", type: "text"
     })
     interface.add_merge_var('SIZE', 'Your Size')
+  end
+
+  it "does not segment users when no segment provided" do
+    Spree::Chimpy::Config.customer_segment_name = ""
+    allow(lists).to receive(:subscribe)
+
+    expect(lists).to_not receive(:static_segment_members_add)
+
+    interface.subscribe("user@example.com", {'SIZE' => '10'}, {customer: true})
   end
 end
