@@ -2,7 +2,7 @@
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_chimpy'
-  s.version     = '2.0.0.alpha'
+  s.version     = '2.0.1.alpha'
   s.summary     = 'MailChimp/Spree integration using the mailchimp gem'
   s.description = s.summary
   s.required_ruby_version = '>= 1.9.3'
@@ -17,12 +17,14 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.requirements << 'none'
 
-  s.add_dependency 'spree_core', '~> 3.1.0'
+  spree_version = '>= 3.1.0', '< 4.0'
+  s.add_dependency 'spree_core', spree_version
   s.add_dependency 'gibbon', '~> 2.2'
+  s.add_dependency 'spree_extension'
 
   s.add_development_dependency 'rspec-rails', '~> 2.99'
   s.add_development_dependency 'rubocop'
-  s.add_development_dependency 'capybara', '~> 2.4.4'
+  s.add_development_dependency 'capybara', '~> 2.4'
   s.add_development_dependency 'poltergeist'
   s.add_development_dependency 'factory_girl', '~> 4.4'
   s.add_development_dependency 'shoulda-matchers', '~> 2.5'
@@ -31,6 +33,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'database_cleaner', '1.2.0'
   s.add_development_dependency 'coffee-rails'
   s.add_development_dependency 'sass-rails', '~> 4.0'
-  s.add_development_dependency 'ffaker', '~> 2.2.0'
+  s.add_development_dependency 'ffaker', '~> 2.2'
   s.add_development_dependency 'launchy'
 end
